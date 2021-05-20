@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import axios from 'axios'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import Image from 'react-bootstrap/Image'
+import Gallery from 'react-grid-gallery'
 
 const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
@@ -11,6 +12,8 @@ const style = {
     display: 'flex',
     // padding: 8
 }
+
+
 
 async function checkIsRemoved(url) {
     return new Promise(resolve => {
@@ -48,15 +51,17 @@ async function generateImgurURLS(num) {
     
         let urls = []
         for(let i = 0; i < num; i++){
+            // var image = {}
             var randomKey = randomString(5, chars)
-            var myURL = `https://i.imgur.com/${randomKey}m.jpg`
+            var myURL = `https://i.imgur.com/${randomKey}t.jpg`
             let isRemoved = await checkIsRemoved(myURL)
             while (isRemoved){
                 console.log("generating new url")
                 randomKey = randomString(5, chars)
-                myURL = `https://i.imgur.com/${randomKey}m.jpg`
+                myURL = `https://i.imgur.com/${randomKey}t.jpg`
                 isRemoved = await checkIsRemoved(myURL)
             }
+            
             urls.push(myURL)
         }
         return urls
@@ -83,7 +88,8 @@ function ItemGrid() {
     
     async function fetchMoreData() {
         
-        let newURLS = await generateImgurURLS(5)
+        let newURLS = await generateImgurURLS(1)
+        console.log(newURLS)
         setState({items: state.items.concat(newURLS)})
 
     }
@@ -96,20 +102,17 @@ function ItemGrid() {
                 next = {fetchMoreData}
                 hasMore={true}
                 hasChildren={true}
-                loader={<h4>Loading...</h4>}
+                loader={<h4 style={{color: 'white'}}>Loading...</h4>}
                 pullDownToRefreshContent={
                     <h3 style={{textAlign: 'center'}}>&h8595; Pull down to refresh</h3>
                 }
             >
-                {state.items.map((url, index) => (
-                    <div style={style} key={index}>
-                        <h3>Image {index}</h3>
-                        <Image src={url} />
-                    </div>
-                    
-                ))}
+                <Gallery rowHeight={300} margin={5} images={state.items.map((url, index) => (
+                    {src: url.substring(0,25).concat(".jpg"), thumbnail: url, thumbnailWidth: 320, thumbnailHeight: 320}
+                ))}/>
                 
             </InfiniteScroll>
+            
         </div>
     );
     
